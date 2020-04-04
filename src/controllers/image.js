@@ -6,8 +6,14 @@ const { Image } = require('../models');
 
 const ctrl = {};
 
-ctrl.index = (req, res) => {
-    res.send('Hi');
+ctrl.index = async (req, res) => {
+    const image = await Image.findOne({
+        filename: { $regex: req.params.image_id }
+    }).lean({ virtuals: true });
+
+    console.log(image);
+
+    res.render('image', { image });
 };
 
 ctrl.create = (req, res) => {
@@ -30,7 +36,7 @@ ctrl.create = (req, res) => {
                 const newImg = new Image({
                     title: req.body.title,
                     filename: imgUrl + ext,
-                    decription: req.body.decription
+                    description: req.body.description
                 });
                 const imageSaved = await newImg.save();
                 //res.redirect('/images');
