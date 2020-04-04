@@ -8,13 +8,31 @@ const { Image, Comment } = require('../models');
 const ctrl = {};
 
 ctrl.index = async (req, res) => {
-    const image = await Image.findOne({
+    const viewModel = {
+        image: {},
+        comments: {}
+    };
+
+    let image = await Image.findOne({
         filename: { $regex: req.params.image_id }
-    }).lean({ virtuals: true });
+    });
 
-    const comments = await Comment.find({ image_id: image._id }).lean();
+    if (image) {
+        image.views += 1;
+        await image.save();
 
-    res.render('image', { image, comments });
+        image = await Image.findOne({
+            filename: { $regex: req.params.image_id }
+        }).lean({ virtuals: true });
+        viewModel.image = image;
+
+        const comments = await Comment.find({ image_id: image._id }).lean();
+        viewModel.comments = comments;
+
+        res.render('image', viewModel);
+    } else {
+        res.redirect('/');
+    }
 };
 
 ctrl.create = (req, res) => {
@@ -71,8 +89,10 @@ ctrl.comment = async (req, res) => {
         });
         await newComment.save();
         console.log(newComment);
+        res.redirect(`/images/${image.uniqueId}`);
+    } else {
+        res.redirect('/');
     }
-    res.redirect(`/images/${image.uniqueId}`);
 };
 
 ctrl.remove = (req, res) => {
