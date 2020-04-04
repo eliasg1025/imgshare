@@ -12,9 +12,9 @@ ctrl.index = async (req, res) => {
         filename: { $regex: req.params.image_id }
     }).lean({ virtuals: true });
 
-    console.log(image);
+    const comments = await Comment.find({ image_id: image._id }).lean();
 
-    res.render('image', { image });
+    res.render('image', { image, comments });
 };
 
 ctrl.create = (req, res) => {
