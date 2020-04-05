@@ -30,7 +30,7 @@ ctrl.index = async (req, res) => {
         const comments = await Comment.find({ image_id: image._id }).lean();
         viewModel.comments = comments;
         viewModel = await sidebar(viewModel);
-        console.log(viewModel);
+        console.log(viewModel.sidebar.comments);
 
         res.render('image', viewModel);
     } else {
